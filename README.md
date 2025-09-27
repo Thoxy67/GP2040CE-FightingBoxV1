@@ -1,19 +1,49 @@
-# GP2040 Configuration for the Bitfunx FightingBox v1.0
+# GP2040-CE Configuration for Bitfunx FightingBox V1.0
 
-This configuration is for the [Bitfunx FightingBox v1.0](https://aliexpress.com/item/1005005535007514.html) 🥊🎮
-
-## Download
-
-You can download the latest firmware on my GP2040-CE fork github actions:
-
-- Official repo: [GP2040-CE](https://github.com/OpenStickCommunity/GP2040-CE) 📁
-- Fork: [GP2040-CE](https://github.com/Thoxy67/GP2040-CE) 🍴
-- FightingBoxV1 (submodule): [GP2040CE-FightingBoxV1](https://github.com/Thoxy67/GP2040CE-FightingBoxV1) 🔧
-- Firmware update (github actions artifacts): [fork-cmake.yml](https://github.com/Thoxy67/GP2040-CE/actions/workflows/fork-cmake.yml) ⬇️
+A custom GP2040-CE configuration for the **Bitfunx FightingBox V1.0** arcade controller, providing optimal button mapping and enhanced features for fighting games.
 
 ![Front](./assets/Front.jpg) ![Back](./assets/Back.jpg)
 
-## Pictures
+
+## 🔧 Technical Specifications
+
+| Component | Details |
+|-----------|---------|
+| **Microcontroller** | Raspberry Pi Pico (RP2040) |
+| **Layout** | Stickless (Hitbox-style) |
+| **Display** | I2C OLED 128x64 (SDA: Pin 26, SCL: Pin 27) |
+| **I2C Speed** | 400kHz |
+| **Splash Duration** | 2.5 seconds |
+| **Button Layout** | BUTTON_LAYOUT_STICKLESS |
+| **Firmware Base** | GP2040-CE |
+
+## 🚀 Installation
+
+### Prerequisites
+- Bitfunx FightingBox V1.0 controller (cheap Aliexpress controller)
+- USB cable for firmware flashing
+- Computer with web browser (for web-based flashing) or build environment
+
+### Manual Build
+```bash
+git clone --recursive https://github.com/Thoxy67/GP2040-CE.git
+cd GP2040-CE
+git submodule update --init --recursive
+mkdir build && cd build
+cmake -DPICO_BOARD=FightingBoxV1 ..
+make -j4
+```
+
+## ⚙️ Configuration
+
+The firmware comes pre-configured for optimal FightingBox V1.0 performance. Additional customization can be done through:
+
+- **Web Configurator**: Access at `http://192.168.7.1` while connected
+- **Button Remapping**: Use the built-in hotkey combinations
+- **Display Settings**: Customize splash screen and layout options
+- **Input Modes**: Switch between different console compatibility modes
+
+## 📸 Gallery
 
 ![](./assets/5.jpg)
 ![](./assets/6.jpg)
@@ -22,6 +52,10 @@ You can download the latest firmware on my GP2040-CE fork github actions:
 ![](./assets/9.jpg)
 ![](./assets/10.jpg)
 
-## License 
+## 📄 License
 
-This repository is licensed under the MIT License. For more information, see the [LICENSE](LICENSE) file. 📜
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+**Disclaimer**: This config is provided as-is. Always test thoroughly before use in competitive settings.
