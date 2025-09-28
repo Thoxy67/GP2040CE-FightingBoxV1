@@ -17,6 +17,20 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential libstdc++-arm-none-eabi-newlib nodejs
+      - name: Set version variables
+        id: version
+        run: |
+          if [[ $GITHUB_REF_TYPE == "tag" ]]; then
+            VERSION_TAG=${GITHUB_REF_NAME}
+            if [[ $VERSION_TAG == *"-pre" ]]; then
+              echo "PRERELEASE=true" >> $GITHUB_OUTPUT
+            else
+              echo "PRERELEASE=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "PRERELEASE=false" >> $GITHUB_OUTPUT
+          fi
+          echo "VERSION_TAG=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
       - name: Build firmware
         run: make
       - name: List build artifacts
@@ -38,3 +52,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: build/cmake/*.uf2
+          prerelease: ${{ steps.version.outputs.PRERELEASE }}
