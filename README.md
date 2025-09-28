@@ -33,7 +33,7 @@ A custom GP2040-CE configuration for the **Bitfunx FightingBox V1.0** arcade con
 #### Controller Modes
 
 - **Bootsel Mode**: Hold `UP + Start + Select` (UP + S1 + S2) while connecting USB - for firmware updates
-- **Web UI Mode**: Hold `Start` (S1) while connecting USB - for configuration at `http://192.168.7.1`
+- **Web UI Mode**: Hold `Start + Select` (S1 + S2) while connecting USB - for configuration at `http://192.168.7.1`
 
 ### Option 2: Build from Source
 
