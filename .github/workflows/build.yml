@@ -1,0 +1,40 @@
+name: Build GP2040-CE FightingBox V1
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential libstdc++-arm-none-eabi-newlib nodejs
+      - name: Build firmware
+        run: make
+      - name: List build artifacts
+        run: |
+          echo "Build directory contents:"
+          find build/cmake -name "*.uf2" -o -name "*.bin" -o -name "*.hex" -o -name "*.elf" | head -20
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gp2040ce-fightingboxv1-firmware
+          path: |
+            build/cmake/*.uf2
+            build/cmake/*.bin
+            build/cmake/*.hex
+            build/cmake/*.elf
+          retention-days: 30
+      - name: Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/cmake/*.uf2
