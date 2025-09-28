@@ -24,14 +24,24 @@ A custom GP2040-CE configuration for the **Bitfunx FightingBox V1.0** arcade con
 - USB cable for firmware flashing
 - Computer with web browser (for web-based flashing) or build environment
 
-### Manual Build
+### Build Environment Setup
+
+For detailed build environment setup, see: https://gp2040-ce.info/development/build-environment/
+
+**Ubuntu/Debian:**
 ```bash
-git clone --recursive https://github.com/Thoxy67/GP2040-CE.git
-cd GP2040-CE
-git submodule update --init --recursive
-mkdir build && cd build
-cmake -DPICO_BOARD=FightingBoxV1 ..
-make -j4
+sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential libstdc++-arm-none-eabi-newlib nodejs
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -S cmake arm-none-eabi-gcc arm-none-eabi-newlib nodejs
+```
+
+### Build
+
+```bash
+make
 ```
 
 ## ⚙️ Configuration

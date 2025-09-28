@@ -8,6 +8,7 @@ GP2040_DIR := $(BUILD_DIR)/GP2040-CE
 CMAKE_DIR := $(BUILD_DIR)/cmake
 BOARD_CONFIG := FightingBoxV1
 CONFIG_DIR := $(GP2040_DIR)/configs/$(BOARD_CONFIG)
+NPROC := $(shell nproc)
 
 # Default target
 .PHONY: all
@@ -71,7 +72,7 @@ cmake-build: configure-board
 	mkdir -p $(CMAKE_DIR)
 	cd $(CMAKE_DIR) && \
 	PICO_SDK_PATH=$(PICO_SDK_DIR) cmake $(GP2040_DIR) -DGP2040_BOARDCONFIG=$(BOARD_CONFIG) && \
-	$(MAKE)
+	$(MAKE) -j$(NPROC)
 
 # Cleanup temporary files
 .PHONY: cleanup
