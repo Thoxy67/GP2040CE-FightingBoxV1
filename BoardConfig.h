@@ -65,10 +65,36 @@
 #define DISPLAY_I2C_BLOCK i2c1
 #define I2C_SPEED 400000
 
-#define BUTTON_LAYOUT BUTTON_LAYOUT_STICKLESS
-#define BUTTON_LAYOUT_RIGHT BUTTON_LAYOUT_STICKLESSB
+#define BUTTON_LAYOUT BUTTON_LAYOUT_BOARD_DEFINED_A
+#define BUTTON_LAYOUT_RIGHT BUTTON_LAYOUT_BOARD_DEFINED_B
 #define SPLASH_MODE SPLASH_MODE_STATIC
 #define SPLASH_DURATION 2500
+
+#define DEFAULT_BOARD_LAYOUT_A                                                 \
+  {                                                                            \
+      {GP_ELEMENT_PIN_BUTTON, {6, 14, 3, 3, 1, 1, 28, GP_SHAPE_ELLIPSE}},      \
+      {GP_ELEMENT_PIN_BUTTON, {13, 14, 3, 3, 1, 1, 4, GP_SHAPE_ELLIPSE}},      \
+      {GP_ELEMENT_PIN_BUTTON, {22, 14, 3, 3, 1, 1, 5, GP_SHAPE_ELLIPSE}},      \
+      {GP_ELEMENT_PIN_BUTTON, {29, 14, 3, 3, 1, 1, 6, GP_SHAPE_ELLIPSE}},      \
+      {GP_ELEMENT_PIN_BUTTON, {38, 14, 3, 3, 1, 1, 21, GP_SHAPE_ELLIPSE}},     \
+      {GP_ELEMENT_PIN_BUTTON, {46, 14, 3, 3, 1, 1, 22, GP_SHAPE_ELLIPSE}},     \
+      {GP_ELEMENT_PIN_BUTTON, {19, 34, 8, 23, 1, 1, 0, GP_SHAPE_SQUARE, 16}},  \
+      {GP_ELEMENT_PIN_BUTTON, {32, 35, 21, 24, 1, 1, 2, GP_SHAPE_SQUARE, 16}}, \
+      {GP_ELEMENT_PIN_BUTTON, {46, 41, 35, 30, 1, 1, 3, GP_SHAPE_SQUARE, 16}}, \
+      {GP_ELEMENT_PIN_BUTTON, {46, 59, 65, 50, 1, 1, 1, GP_SHAPE_SQUARE}},     \
+  }
+
+#define DEFAULT_BOARD_LAYOUT_B                                                 \
+  {                                                                            \
+      {GP_ELEMENT_PIN_BUTTON, {63, 32, 74, 21, 1, 1, 7, GP_SHAPE_SQUARE}},     \
+      {GP_ELEMENT_PIN_BUTTON, {76, 25, 88, 14, 1, 1, 8, GP_SHAPE_SQUARE}},     \
+      {GP_ELEMENT_PIN_BUTTON, {90, 25, 102, 14, 1, 1, 9, GP_SHAPE_SQUARE}},    \
+      {GP_ELEMENT_PIN_BUTTON, {104, 33, 116, 21, 1, 1, 10, GP_SHAPE_SQUARE}},  \
+      {GP_ELEMENT_PIN_BUTTON, {63, 45, 74, 34, 1, 1, 11, GP_SHAPE_SQUARE}},    \
+      {GP_ELEMENT_PIN_BUTTON, {76, 39, 88, 27, 1, 1, 12, GP_SHAPE_SQUARE}},    \
+      {GP_ELEMENT_PIN_BUTTON, {90, 39, 102, 27, 1, 1, 13, GP_SHAPE_SQUARE}},   \
+      {GP_ELEMENT_PIN_BUTTON, {104, 47, 116, 35, 1, 1, 14, GP_SHAPE_SQUARE}},  \
+  }
 
 // For details on this, see:
 // https://gp2040-ce.info/#/development?id=i2c-display-splash
