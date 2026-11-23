@@ -64,7 +64,7 @@ jobs:
 
       - name: Cache pico-sdk ${{ steps.meta.outputs.pico_sdk }}
         id: sdk-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: _deps/pico-sdk
           key: pico-sdk-${{ steps.meta.outputs.pico_sdk }}
