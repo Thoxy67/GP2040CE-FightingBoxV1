@@ -1,55 +1,150 @@
-name: Build GP2040-CE FightingBox V1
+name: Build firmware
+
 on:
   push:
     branches: [main]
     tags: ["v*"]
+    paths-ignore: ["**.md", "docs/**", "LICENSE"]
   pull_request:
     branches: [main]
-  release:
-    types: [published]
+    paths-ignore: ["**.md", "docs/**", "LICENSE"]
+  # Weekly build against upstream main to catch breaking GP2040-CE changes early
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      gp2040_ref:
+        description: "GP2040-CE ref to build (branch, tag or commit)"
+        default: main
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  BOARD: FightingBoxV1
+  GP2040_REF: ${{ inputs.gp2040_ref || 'main' }}
+  ARM_GCC_RELEASE: "15.3.Rel1" # same toolchain as upstream GP2040-CE CI
+
 jobs:
   build:
+    name: Build ${{ inputs.gp2040_ref || 'main' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      gp2040_version: ${{ steps.meta.outputs.gp2040_version }}
+      gp2040_sha: ${{ steps.meta.outputs.gp2040_sha }}
+      pico_sdk: ${{ steps.meta.outputs.pico_sdk }}
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v5
-      - name: Install dependencies
+
+      - name: Checkout GP2040-CE (${{ env.GP2040_REF }})
+        uses: actions/checkout@v5
+        with:
+          repository: OpenStickCommunity/GP2040-CE
+          ref: ${{ env.GP2040_REF }}
+          path: _deps/GP2040-CE
+          fetch-depth: 0 # tags are needed for the firmware version string
+          submodules: recursive
+
+      - name: Read upstream metadata
+        id: meta
+        working-directory: _deps/GP2040-CE
         run: |
-          sudo apt update
-          sudo apt install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential libstdc++-arm-none-eabi-newlib nodejs
-      - name: Set version variables
-        id: version
+          sdk=$(sed -n 's/^set(sdkVersion \([0-9.]*\))/\1/p' CMakeLists.txt)
+          echo "pico_sdk=${sdk}" >> "$GITHUB_OUTPUT"
+          echo "gp2040_version=$(git describe --tags --always)" >> "$GITHUB_OUTPUT"
+          echo "gp2040_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "GP2040-CE $(git describe --tags --always) -> pico-sdk ${sdk}"
+
+      - name: Cache pico-sdk ${{ steps.meta.outputs.pico_sdk }}
+        id: sdk-cache
+        uses: actions/cache@v4
+        with:
+          path: _deps/pico-sdk
+          key: pico-sdk-${{ steps.meta.outputs.pico_sdk }}
+
+      - name: Checkout pico-sdk ${{ steps.meta.outputs.pico_sdk }}
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v5
+        with:
+          repository: raspberrypi/pico-sdk
+          ref: ${{ steps.meta.outputs.pico_sdk }}
+          path: _deps/pico-sdk
+          submodules: true
+
+      - name: Install ARM GCC ${{ env.ARM_GCC_RELEASE }}
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: ${{ env.ARM_GCC_RELEASE }}
+
+      - name: Setup Node.js (web configurator)
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: _deps/GP2040-CE/www/package-lock.json
+
+      - name: Build
+        # _deps/ is outside build/, so the Makefile uses these checkouts as-is
+        run: make build GP2040_DIR="$PWD/_deps/GP2040-CE" PICO_SDK_PATH="$PWD/_deps/pico-sdk"
+
+      - name: Checksums & summary
+        working-directory: build/out
         run: |
-          if [[ $GITHUB_REF_TYPE == "tag" ]]; then
-            VERSION_TAG=${GITHUB_REF_NAME}
-            if [[ $VERSION_TAG == *"-pre" ]]; then
-              echo "PRERELEASE=true" >> $GITHUB_OUTPUT
-            else
-              echo "PRERELEASE=false" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "PRERELEASE=false" >> $GITHUB_OUTPUT
-          fi
-          echo "VERSION_TAG=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
-      - name: Build firmware
-        run: make
-      - name: List build artifacts
-        run: |
-          echo "Build directory contents:"
-          find build/cmake -name "*.uf2" -o -name "*.bin" -o -name "*.hex" -o -name "*.elf" | head -20
-      - name: Upload build artifacts
+          sha256sum *.uf2 > SHA256SUMS
+          {
+            echo "### FightingBox V1 firmware"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| GP2040-CE | \`${{ steps.meta.outputs.gp2040_version }}\` ([`${{ steps.meta.outputs.gp2040_sha }}`](https://github.com/OpenStickCommunity/GP2040-CE/commit/${{ steps.meta.outputs.gp2040_sha }})) |"
+            echo "| pico-sdk | \`${{ steps.meta.outputs.pico_sdk }}\` |"
+            echo "| ARM GCC | \`${{ env.ARM_GCC_RELEASE }}\` |"
+            echo ""
+            echo '```'
+            cat SHA256SUMS
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
-          name: gp2040ce-fightingboxv1-firmware
+          name: ${{ env.BOARD }}-firmware
           path: |
-            build/cmake/*.uf2
-            build/cmake/*.bin
-            build/cmake/*.hex
-            build/cmake/*.elf
+            build/out/*.uf2
+            build/out/SHA256SUMS
+          if-no-files-found: error
           retention-days: 30
-      - name: Release
-        if: github.ref_type == 'tag'
+
+  release:
+    name: Publish release
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download firmware
+        uses: actions/download-artifact@v5
+        with:
+          name: ${{ env.BOARD }}-firmware
+          path: dist
+
+      - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: build/cmake/*.uf2
-          prerelease: ${{ steps.version.outputs.PRERELEASE }}
+          files: |
+            dist/*.uf2
+            dist/SHA256SUMS
+          prerelease: ${{ contains(github.ref_name, '-pre') || contains(github.ref_name, '-rc') }}
+          generate_release_notes: true
+          body: |
+            Built from GP2040-CE `${{ needs.build.outputs.gp2040_version }}` ([`${{ needs.build.outputs.gp2040_sha }}`](https://github.com/OpenStickCommunity/GP2040-CE/commit/${{ needs.build.outputs.gp2040_sha }})) with pico-sdk `${{ needs.build.outputs.pico_sdk }}`.
+
+            **Flash:** hold `UP + S1 + S2` while plugging in USB, then copy the `.uf2` onto the `RPI-RP2` drive.

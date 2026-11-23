@@ -1,95 +1,89 @@
-# GP2040-CE Configuration for Bitfunx FightingBox V1.0
+# GP2040-CE for Bitfunx FightingBox V1.0
 
-A custom GP2040-CE configuration for the **Bitfunx FightingBox V1.0** arcade controller, providing optimal button mapping and enhanced features for fighting games.
+[![Build firmware](https://github.com/Thoxy67/GP2040CE-FightingBoxV1/actions/workflows/build.yml/badge.svg)](https://github.com/Thoxy67/GP2040CE-FightingBoxV1/actions/workflows/build.yml)
+[![Latest release](https://img.shields.io/github/v/release/Thoxy67/GP2040CE-FightingBoxV1?include_prereleases)](https://github.com/Thoxy67/GP2040CE-FightingBoxV1/releases)
 
-![Front](./assets/Front.jpg) ![Back](./assets/Back.jpg)
+Up-to-date [GP2040-CE](https://gp2040-ce.info/) firmware for the **Bitfunx FightingBox V1.0**, a cheap AliExpress hitbox-style controller whose stock firmware is no longer maintained.
 
+<p align="center">
+  <img src="docs/images/Front.jpg" width="49%" alt="Front">
+  <img src="docs/images/Back.jpg" width="49%" alt="Back">
+</p>
 
-## 🔧 Technical Specifications
+## Features
 
-| Component | Details |
-|-----------|---------|
-| **Microcontroller** | Raspberry Pi Pico (RP2040) |
-| **Layout** | Stickless (Hitbox-style) |
-| **Display** | I2C OLED 128x64 (SDA: Pin 26, SCL: Pin 27) |
-| **I2C Speed** | 400kHz |
-| **Splash Duration** | 2.5 seconds |
-| **Button Layout** | BUTTON_LAYOUT_STICKLESS |
-| **Firmware Base** | GP2040-CE |
+- Latest GP2040-CE: works on PC, Switch, PS3/PS4/PS5, Xbox, and more
+- All buttons mapped to the original board wiring
+- OLED display support, with an on-screen layout that matches the physical buttons
+- Custom boot logo:
 
-## 🚀 Installation
+  <img src="configs/FightingBoxV1/assets/splash.png" width="256" alt="Boot logo">
 
-### Option 1: Download Pre-built Firmware (Recommended)
+## Install
 
-**Download the latest UF2 firmware file from:** https://github.com/Thoxy67/GP2040CE-FightingBoxV1/releases
+1. Download the latest `.uf2` from [Releases](https://github.com/Thoxy67/GP2040CE-FightingBoxV1/releases).
+2. Hold **UP + S1 + S2** while plugging in the USB cable. A drive named `RPI-RP2` appears.
+3. Copy the `.uf2` onto that drive. The controller reboots by itself, and that's it.
 
-#### Flashing Instructions
+| Hold while plugging in | Mode |
+|---|---|
+| `UP + S1 + S2` | Flash mode (firmware update) |
+| `S1 + S2` | Web configurator at <http://192.168.7.1> |
 
-1. **Enter Bootsel Mode**: Hold `UP + Start + Select` (UP + S1 + S2) while connecting the USB cable
-2. **Device Recognition**: The controller will appear as a mass storage device named `RPI-RP2`
-3. **Flash Firmware**: Copy the downloaded `.uf2` file to the `RPI-RP2` drive
-4. **Automatic Reboot**: The device will automatically restart with the new firmware
+> **Updating from an old firmware?** If buttons or the screen act strangely, reset the settings in the web configurator.
 
-#### Controller Modes
+## Button mapping
 
-- **Bootsel Mode**: Hold `UP + Start + Select` (UP + S1 + S2) while connecting USB - for firmware updates
-- **Web UI Mode**: Hold `Start + Select` (S1 + S2) while connecting USB - for configuration at `http://192.168.7.1`
+| GPIO | Button | GPIO | Button | GPIO | Button |
+|---:|---|---:|---|---:|---|
+| 0 | Left  | 7  | B3 | 13 | R2 |
+| 1 | Up    | 8  | B4 | 14 | L2 |
+| 2 | Down  | 9  | R1 | 21 | L3 |
+| 3 | Right | 10 | L1 | 22 | R3 |
+| 4 | A1 (Home) | 11 | B1 | 28 | A2 (Capture) |
+| 5 | S1 (Select) | 12 | B2 | 26 / 27 | OLED SDA / SCL |
+| 6 | S2 (Start) | | | | |
 
-### Option 2: Build from Source
+Everything can be remapped in the web configurator.
 
-#### Prerequisites
-- Bitfunx FightingBox V1.0 controller (cheap Aliexpress controller)
-- USB cable for firmware flashing
-- Computer with web browser (for web-based flashing) or build environment
+## Build from source
 
-#### Build Environment Setup
-
-For detailed build environment setup, see: https://gp2040-ce.info/development/build-environment/
-
-**Ubuntu/Debian:**
-```bash
-sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential libstdc++-arm-none-eabi-newlib nodejs
-```
-
-**Arch Linux:**
-```bash
-sudo pacman -S cmake arm-none-eabi-gcc arm-none-eabi-newlib nodejs
-```
-
-#### Build
+Install the tools. See the [GP2040-CE build guide](https://gp2040-ce.info/development/build-environment/) for more details.
 
 ```bash
-make
+# Arch
+sudo pacman -S git cmake arm-none-eabi-gcc arm-none-eabi-newlib nodejs npm
+# Ubuntu / Debian
+sudo apt install git cmake build-essential gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib nodejs npm
 ```
 
-## ⚙️ Configuration
+Then build:
 
-The firmware comes pre-configured for optimal FightingBox V1.0 performance. Additional customization can be done through:
+```bash
+make                          # latest GP2040-CE
+make GP2040_REF=v0.7.12       # a specific GP2040-CE version
+make GP2040_DIR=~/GP2040-CE   # use your own GP2040-CE checkout
+make clean
+```
 
-- **Web Configurator**: Access at `http://192.168.7.1` while connected
-- **Button Remapping**: Use the built-in hotkey combinations
-- **Display Settings**: Customize splash screen and layout options
-- **Input Modes**: Switch between different console compatibility modes
+The firmware is written to `build/out/`. The board configuration is in [`configs/FightingBoxV1/BoardConfig.h`](configs/FightingBoxV1/BoardConfig.h).
 
-## 📸 Gallery
+CI builds every push, runs a weekly build against upstream to catch breaking changes, and publishes a release for each `v*` tag.
 
-![](./assets/5.jpg)
-![](./assets/6.jpg)
-![](./assets/7.jpg)
-![](./assets/8.jpg)
-![](./assets/9.jpg)
-![](./assets/10.jpg)
+## Gallery
 
-## 🔗 Related Links
+<details>
+<summary>More photos</summary>
 
-- **GP2040-CE Official Website**: https://gp2040-ce.info/
-- **GP2040-CE Repository**: https://github.com/OpenStickCommunity/GP2040-CE
-- **GP2040-CE Documentation**: https://gp2040-ce.info/introduction/
+![](docs/images/5.jpg)
+![](docs/images/6.jpg)
+![](docs/images/7.jpg)
+![](docs/images/8.jpg)
+![](docs/images/9.jpg)
+![](docs/images/10.jpg)
 
-## 📄 License
+</details>
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## License
 
----
-
-**Disclaimer**: This config is provided as-is. Always test thoroughly before use in competitive settings.
+MIT, see [LICENSE](LICENSE). Provided as-is; test before using it in competitive play.
