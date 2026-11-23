@@ -84,7 +84,7 @@ jobs:
           release: ${{ env.ARM_GCC_RELEASE }}
 
       - name: Setup Node.js (web configurator)
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
