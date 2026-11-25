@@ -41,10 +41,10 @@ jobs:
       pico_sdk: ${{ steps.meta.outputs.pico_sdk }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Checkout GP2040-CE (${{ env.GP2040_REF }})
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: OpenStickCommunity/GP2040-CE
           ref: ${{ env.GP2040_REF }}
@@ -71,7 +71,7 @@ jobs:
 
       - name: Checkout pico-sdk ${{ steps.meta.outputs.pico_sdk }}
         if: steps.sdk-cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: raspberrypi/pico-sdk
           ref: ${{ steps.meta.outputs.pico_sdk }}
@@ -84,7 +84,7 @@ jobs:
           release: ${{ env.ARM_GCC_RELEASE }}
 
       - name: Setup Node.js (web configurator)
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
@@ -113,7 +113,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload firmware
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.BOARD }}-firmware
           path: |
@@ -131,7 +131,7 @@ jobs:
       contents: write
     steps:
       - name: Download firmware
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.BOARD }}-firmware
           path: dist
